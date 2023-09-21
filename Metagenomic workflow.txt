@@ -16,13 +16,14 @@ Metagenomic workflow, code-level description:
 - recommend batch scripts to automate process if doing many files (see structure below)
 - set thread count to whatever your machine can handle (my default is 192 threads/4 cores).  Note that MEGAHIT in particular may starve the server or memory at higher thread counts. 
 Sysinfo:
-- Xeon Platinum 8268 processor, 4 CPU’s/96 cores, 768GB RAM
+- Xeon Platinum 8268 processor, 4 CPUâ€™s/96 cores, 768GB RAM
 - OS/base software: Ubuntu 20.04, Python 3.10, Conda 23.5.0
 Assumptions:
 - Illumina paired-end data
 - default R1 and R2 filenames
 - all located in same data folder 
 - GTDB database installed (follow directions https://gtdb.ecogenomic.org/)
+
 1 for file1 in *R1*fastq.gz
 do 
 file2=${file1/R1/R2}
@@ -36,12 +37,14 @@ done
 2 fastqc *.fastq.gz
 
 3 multiqc .
+
 4 for file1 in *1P*fastq.gz
 do 
 file2=${file1/1P/2P}
 out=${file1%%trimmed1P_001.fastq.gz}.hit 
 megahit -1 $file1 -2 $file2 -o $out -t 192
 done
+
 5 ***Rename MEGAHIT outputs to include sample ID and move to separate analysis folder
 (I use WinSCP for this)***
 6 for file1 in *.fa
@@ -50,10 +53,11 @@ out=${file1%%.fa}_kraken2_gtdb_output
 classout=${file1%%.fa}_cseqs.fq
 unclass=${file1%%.fa}_ucseqs.fq
 report=${file1%%.fa}.kreport
-kraken2 --db ../../../database –-threads 192 --classified-out $classout –unclassified-out $unclass --output $out --report $report $file1
+kraken2 --db ../../../database â€“-threads 192 --classified-out $classout â€“unclassified-out $unclass --output $out --report $report $file1
 done
 
 7 kraken-biom *kreport -m [tab-delimited metadata].tsv
+
 8 ***import .biom files to MicrobiomeDB (https://microbiomedb.org/mbio/app ) and analyze***
 (note: R-based workflow coming soon)
 
