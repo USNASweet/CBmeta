@@ -5,7 +5,7 @@
 
 3. Export 16S reads as a single fasta file for each sample (compile into a metagenomic 16S dataset)
 
-4. MEGAHIT 1.2.9 to ìassembleî 16S long-read consensus data
+4. MEGAHIT 1.2.9 to ‚Äúassemble‚Äù 16S long-read consensus data
 
 5. Kraken 2.1.2 against GTDB database for phylogenetic profile of 16S data
 
@@ -18,7 +18,7 @@
 - recommend batch scripts to automate process if doing many files (see structure below)
 - set thread count to whatever your machine can handle (my default is 192 threads/4 cores).  Note that MEGAHIT in particular may starve the server or memory at higher thread counts. 
 Sysinfo:
-- Xeon Platinum 8268 processor, 4 CPUís/96 cores, 768GB RAM
+- Xeon Platinum 8268 processor, 4 CPU‚Äôs/96 cores, 768GB RAM
 - OS/base software: Ubuntu 20.04, Python 3.10, Conda 23.5.0
 Assumptions:
 - Validated consensus sequence of 16S gene assembled from Sanger forward and reverse reads
@@ -35,15 +35,17 @@ done
 
 3 ***Rename MEGAHIT outputs to include sample ID and move to separate analysis folder
 (I use WinSCP for this)***
+
 4 for file1 in *.fa
 do 
 out=${file1%%.fa}_kraken2_gtdb_output
 classout=${file1%%.fa}_cseqs.fq
 unclass=${file1%%.fa}_ucseqs.fq
 report=${file1%%.fa}.kreport
-kraken2 --db ../../../database ñ-threads 192 --classified-out $classout ñunclassified-out $unclass --output $out --report $report $file1
+kraken2 --db ../../../database ‚Äì-threads 192 --classified-out $classout ‚Äìunclassified-out $unclass --output $out --report $report $file1
 done
 
 5 kraken-biom *kreport -m [tab-delimited metadata].tsv
+
 6 ***import .biom files to MicrobiomeDB (https://microbiomedb.org/mbio/app ) and analyze***
 
