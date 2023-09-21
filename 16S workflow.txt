@@ -1,0 +1,49 @@
+16S Sanger workflow, narrative description:
+1. Validate Sanger 16S by manual inspection of chromatograms or using Geneious Prime (v.2023.1.2)
+
+2. Align forward and reverse 16S reads, generate consensus sequence, and trim low-quality ends (all done with Geneious default settings)
+
+3. Export 16S reads as a single fasta file for each sample (compile into a metagenomic 16S dataset)
+
+4. MEGAHIT 1.2.9 to “assemble” 16S long-read consensus data
+
+5. Kraken 2.1.2 against GTDB database for phylogenetic profile of 16S data
+
+6. Conversion of kraken2 report to biom file (kraken-biom 1.2.0)
+
+7. Upload .biom files into MicrobiomeDB and analyze with field-standard tools
+
+16S Sanger workflow, code-level description:
+- recommend using shell for run protection
+- recommend batch scripts to automate process if doing many files (see structure below)
+- set thread count to whatever your machine can handle (my default is 192 threads/4 cores).  Note that MEGAHIT in particular may starve the server or memory at higher thread counts. 
+Sysinfo:
+- Xeon Platinum 8268 processor, 4 CPU’s/96 cores, 768GB RAM
+- OS/base software: Ubuntu 20.04, Python 3.10, Conda 23.5.0
+Assumptions:
+- Validated consensus sequence of 16S gene assembled from Sanger forward and reverse reads
+- all located in same data folder 
+- GTDB database installed (follow directions https://gtdb.ecogenomic.org/)
+
+1 validate and assemble 16S Sanger sequence data into single fasta file per microbiome sample (I use Geneious Prime for this, see above) and store all sample files in single data folder on server.
+
+2 for file1 in *.fasta
+do 
+out=${file1%%.fasta}.hit 
+megahit -r -1 $file1 -o $out -t 192
+done
+
+3 ***Rename MEGAHIT outputs to include sample ID and move to separate analysis folder
+(I use WinSCP for this)***
+4 for file1 in *.fa
+do 
+out=${file1%%.fa}_kraken2_gtdb_output
+classout=${file1%%.fa}_cseqs.fq
+unclass=${file1%%.fa}_ucseqs.fq
+report=${file1%%.fa}.kreport
+kraken2 --db ../../../database –-threads 192 --classified-out $classout –unclassified-out $unclass --output $out --report $report $file1
+done
+
+5 kraken-biom *kreport -m [tab-delimited metadata].tsv
+6 ***import .biom files to MicrobiomeDB (https://microbiomedb.org/mbio/app ) and analyze***
+
