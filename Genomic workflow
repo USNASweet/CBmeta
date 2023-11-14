@@ -1,0 +1,38 @@
+Genomic workflow, narrative description:
+1.	Trimmomatic 0.39 to clean shotgun data, using TruSeq3-PE-2.fa clip file
+2.	FASTQC 0.12.1 to validate trimmed data
+3.	SPAdes 3.15.5 assembly of shotgun data into contigs
+4.	Filter contigs >999bp, >4X coverage using seqkit 2.4.0 and csvtk 0.25.0
+5.	Extract sequence statistics from seqkit (stats.sh)
+
+6.	Upload filtered contigs to RAST server for annotation
+
+7.	Analysis of annotated ORF and raw contigs
+
+Genomic workflow, code-level description for steps in Python/Conda:
+$ recommend using shell for run protection
+$ recommend batch scripts to automate process if doing many files (see structure below)
+$ set thread count to whatever your machine can handle (my default is 192 threads/4 cores). 
+$ Sysinfo:
+Xeon Platinum 8268 processor, 4 CPU’s/96 cores, 768GB RAM
+OS/base software: Ubuntu 20.04, Python 3.10, Conda 23.5.0
+$ Assumptions:
+     	Illumina paired-end data
+     	default R1 and R2 filenames
+     	all located in same data folder 
+
+1. Trimmomatic trimming:
+trimmomatic PE -threads 192 -basein <genomes/data/299_R1_001.fastq.gz> -baseout <299trimmed.fastq.gz> ILLUMINACLIP:TruSeq3-PE-2.fa:2:30:10:2:True LEADING:3 TRAILING:3 MINLEN:36
+
+2. SPAdes Assembly:
+spades.py -t 192 -o <genomes/genomes/genome299/> --isolate -1 <genomes/data/299trimmed_1P.fastq.gz> -2 <genomes/data/299trimmed_2P.fastq.gz>
+
+3. To filter out less than 1000 and less than 5X coverage:
+seqkit fx2tab [sample]contigs.fasta -o [sample]contigs.tab
+csvtk mutate [sample]contigs.tab -H -t -f 1 -p “cov_(.+)” |  csvtk mutate -H -t -f 1 -p “length_([0-9]+)” -o [sample]contigs.coltab
+csvtk filter2 [sample]contigs.coltab -H -t -f ‘$4>=5’ -o [sample]contigs.filtab
+csvtk filter2 [sample]contigs.filtab2 -H -t -f ‘$5>=1000’ -o [sample]contigs.filtab2
+seqkit tab2fx [sample]contigs.filtab2 o- [sample]filtered.fasta
+
+4. To extract statistics:
+stats.sh [sample]filtered.fasta >> stats
