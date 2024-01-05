@@ -14,7 +14,7 @@
 7. Upload .biom files into MicrobiomeDB and analyze with field-standard tools
 
 16S Sanger workflow, code-level description:
-- recommend using shell for run protection
+- recommend using screen or tmux for run protection
 - recommend batch scripts to automate process if doing many files (see structure below)
 - set thread count to whatever your machine can handle (my default is 192 threads/4 cores).  Note that MEGAHIT in particular may starve the server or memory at higher thread counts. 
 Sysinfo:
