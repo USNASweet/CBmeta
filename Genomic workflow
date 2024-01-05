@@ -10,7 +10,7 @@ Genomic workflow, narrative description:
 7.	Analysis of annotated ORF and raw contigs
 
 Genomic workflow, code-level description for steps in Python/Conda:
-$ recommend using shell for run protection
+$ recommend using screen or tmux for run protection
 $ recommend batch scripts to automate process if doing many files (see structure below)
 $ set thread count to whatever your machine can handle (my default is 192 threads/4 cores). 
 $ Sysinfo:
