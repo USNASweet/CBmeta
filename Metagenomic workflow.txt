@@ -47,6 +47,7 @@ done
 
 5 ***Rename MEGAHIT outputs to include sample ID and move to separate analysis folder
 (I use WinSCP for this)***
+
 6 for file1 in *.fa
 do 
 out=${file1%%.fa}_kraken2_gtdb_output
